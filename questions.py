@@ -1,66 +1,89 @@
 import random
 
-words = [
-    "python",
-    "programa",
-    "variable",
-    "funcion",
-    "bucle",
-    "cadena",
-    "entero",
-    "lista",
-]
+# Diccionario de categorías
+categorias = {
+    "programacion": ["python", "variable", "funcion", "bucle", "lista"],
+    "matematica": ["entero", "fraccion", "derivada", "integral", "matriz"],
+    "tecnologia": ["servidor", "internet", "computadora", "teclado", "pantalla"]
+}
 
-word = random.choice(words)
-guessed = []
-attempts = 6
-puntaje = 0
+# Copia de palabras disponibles para que no se repitan
+palabras_disponibles = {}
+for categoria in categorias:
+    palabras_disponibles[categoria] = categorias[categoria].copy()
 
-print("¡Bienvenido al Ahorcado!")
-print()
+puntaje_total = 0
 
-while attempts > 0:
-    # Mostrar progreso
-    progress = ""
-    for letter in word:
-        if letter in guessed:
-            progress += letter + " "
-        else:
-            progress += "_ "
-    print(progress)
+while True:
+    print("\nCategorías disponibles:")
+    for categoria in categorias:
+        print("-", categoria)
 
-    # Verificar victoria
-    if "_" not in progress:
-        print("¡Ganaste!")
-        puntaje += 6
-        print(f"Puntaje final: {puntaje}")
-        break
+    categoria_elegida = input("Elegí una categoría: ").strip().lower()
 
-    print(f"Intentos restantes: {attempts}")
-    print(f"Letras usadas: {', '.join(guessed)}")
-
-    # Input del usuario
-    letter = input("Ingresá una letra: ").strip().lower()
-
-    # Validación
-    if len(letter) != 1 or not letter.isalpha():
-        print("Entrada no válida")
+    if categoria_elegida not in categorias:
+        print("Categoría no válida")
         continue
 
-    if letter in guessed:
-        print("Ya usaste esa letra.")
-    elif letter in word:
-        guessed.append(letter)
-        print("¡Bien! Esa letra está en la palabra.")
+    # Si no quedan palabras en esa categoría, reiniciamos esa lista
+    if len(palabras_disponibles[categoria_elegida]) == 0:
+        palabras_disponibles[categoria_elegida] = categorias[categoria_elegida].copy()
+
+    palabra = random.choice(palabras_disponibles[categoria_elegida])
+    palabras_disponibles[categoria_elegida].remove(palabra)
+
+    adivinadas = []
+    intentos = 6
+    puntaje_ronda = 0
+
+    print("\n¡Bienvenido al Ahorcado!")
+    print("Categoría elegida:", categoria_elegida)
+
+    while intentos > 0:
+        progreso = ""
+        for letra in palabra:
+            if letra in adivinadas:
+                progreso += letra + " "
+            else:
+                progreso += "_ "
+
+        print("\n" + progreso)
+
+        if "_" not in progreso:
+            print("¡Ganaste!")
+            puntaje_ronda += 6
+            puntaje_total += puntaje_ronda
+            print("Puntaje de esta ronda:", puntaje_ronda)
+            print("Puntaje total:", puntaje_total)
+            break
+
+        print("Intentos restantes:", intentos)
+        print("Letras usadas:", ", ".join(adivinadas))
+
+        letra = input("Ingresá una letra: ").strip().lower()
+
+        if len(letra) != 1 or not letra.isalpha():
+            print("Entrada no válida")
+            continue
+
+        if letra in adivinadas:
+            print("Ya usaste esa letra.")
+        elif letra in palabra:
+            adivinadas.append(letra)
+            print("¡Bien! Esa letra está en la palabra.")
+        else:
+            adivinadas.append(letra)
+            intentos -= 1
+            puntaje_ronda -= 1
+            print("Esa letra no está en la palabra.")
+
     else:
-        guessed.append(letter)
-        attempts -= 1
-        puntaje -= 1
-        print("Esa letra no está en la palabra.")
+        print("\n¡Perdiste! La palabra era:", palabra)
+        puntaje_ronda = 0
+        print("Puntaje de esta ronda:", puntaje_ronda)
+        print("Puntaje total:", puntaje_total)
 
-    print()
-
-else:
-    print(f"¡Perdiste! La palabra era: {word}")
-    puntaje = 0
-    print(f"Puntaje final: {puntaje}")
+    seguir = input("\n¿Querés jugar otra ronda? (si/no): ").strip().lower()
+    if seguir != "si":
+        print("Gracias por jugar.")
+        break
